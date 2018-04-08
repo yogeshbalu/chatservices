@@ -1,13 +1,18 @@
-var mysql = require('mysql');
 
-var con = mysql.createConnection({
-    host: "localhost",
-    user: "yourusername",
-    password: "yourpassword"
+var mysql = require('promise-mysql');
+ 
+pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'chat',
+  connectionLimit: 10
 });
-
-con.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
-});
-
+ 
+function getSqlConnection() {
+  return pool.getConnection().disposer(function(connection) {
+    pool.releaseConnection(connection);
+  });
+}
+ 
+module.exports = getSqlConnection

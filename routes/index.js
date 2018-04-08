@@ -6,6 +6,8 @@ function init(app){
     });
 
     app.use('/chat',require('./chat'));
+    app.use('/chat/message',require('./message'));
+    app.use('/chat/sendmail',require('./mail'));
 }
 
 module.exports = {

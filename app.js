@@ -3,7 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+var cors = require('cors');
 
 var app = express();
 
@@ -20,13 +20,14 @@ app.use(cookieParser());
 
 //app.use('/', indexRouter);
 //app.use('/users', usersRouter);
-
+app.use(cors({origin: 'http://localhost:4200'}));
 routes.init(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -39,7 +40,6 @@ app.use(function(err, req, res, next) {
   res.render('error');*/
   res.json({ error: err })
 });
-
 
 
 module.exports = app;
