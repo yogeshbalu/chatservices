@@ -17,15 +17,24 @@ var smtpTransport = nodemailer.createTransport({
 router.post('/', function (req, res) {
     var requestData = req.body;
     var mailOptions = {
-        to: requestData.user_email_address,
+        to: "",
         subject: "Chat conversation history" + new Date(),
-        text: "blank mail"
+        text: ""
     }
 
     return Promise.resolve()
-    .then(() => getChatMessages(requestData.chatId))
+    .then(() => getEmailID(requestData.chatId))
+    .then((emailId) => {
+        mailOptions.to = emailId[0].email_id;
+        return getChatMessages(requestData.chatId);
+    })
     .then(chatHistory => {
-        mailOptions.text = chatHistory;
+        //mailOptions.text = chatHistory;
+        if(chatHistory.length > 0){
+            for(var i =0 ; i < chatHistory.length; i++) {
+                mailOptions.text =  mailOptions.text + chatHistory[i].message + "\n";
+            }
+        }
         smtpTransport.sendMail(mailOptions, function (error, response) {
             if (error) {
                 console.log(JSON.stringify(error));
@@ -55,6 +64,24 @@ function getChatMessages(chatId){
 
    });
 }
+function getEmailID(chatId){
+
+    let params = {
+        chat_id : chatId
+    }
+
+    return   Promise.using(getSqlConnection(), function(connection){
+        return connection.query('select email_id from chat.chat where chat_id ="'+chatId+'"')
+        .then(rows => {
+            console.log(rows);
+             return rows;
+        }).catch(err =>{
+            return err;
+        });
+
+   });
+}
+
 
 
 module.exports = router;
