@@ -15,6 +15,7 @@ var smtpTransport = nodemailer.createTransport({
 
 
 router.post('/', function (req, res) {
+    let adminEmailId = "deek.khadsare@gmail.com";
     var requestData = req.body;
     var mailOptions = {
         to: "",
@@ -23,7 +24,16 @@ router.post('/', function (req, res) {
     }
 
     return Promise.resolve()
-    .then(() => getEmailID(requestData.chatId))
+    .then(() => {
+        if(requestData.sendMailToAdmin){
+            //if true
+            mailOptions.subject = "Unanswered chat history for " + requestData.chat_id;
+            let emailId = [];
+            emailId.push({email_id:adminEmailId})
+            return emailId;
+        }    
+        return getEmailID(requestData.chatId);
+    })
     .then((emailId) => {
         mailOptions.to = emailId[0].email_id;
         return getChatMessages(requestData.chatId);
@@ -81,6 +91,31 @@ function getEmailID(chatId){
 
    });
 }
+
+/*
+router.post('/admin', function (req, res) {
+    var messages = req.body.messages;
+    var mailOptions = {
+        to: "deek.khadsare@gmail.com",
+        subject: "Chat conversation history" + new Date(),
+        text: ""
+    }
+    //mailOptions.text = chatHistory;
+    if(messages.length > 0){
+        for(var i =0 ; i < messages.length; i++) {
+            mailOptions.text =  mailOptions.text + messages[i] + "\n";
+        }
+    }
+    smtpTransport.sendMail(mailOptions, function (error, response) {
+        if (error) {
+            console.log(JSON.stringify(error));
+            res.end(JSON.stringify("error"));
+        } else {
+            console.log("Message sent: " + response.message);
+            res.end(JSON.stringify("sent"));
+        }
+    });
+});*/
 
 
 
